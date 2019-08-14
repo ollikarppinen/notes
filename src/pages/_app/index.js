@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "./../../components/Navbar";
-import HomePage from "./../home";
+import EditorPage from "./../editor";
 import AboutPage from "./../about";
 import FaqPage from "./../faq";
 import PricingPage from "./../pricing";
@@ -29,7 +29,7 @@ function App(props) {
           />
 
           <Switch>
-            <Route exact path="/" component={HomePage} />
+            <Route exact path="/" component={EditorPage} />
 
             <Route exact path="/about" component={AboutPage} />
 
@@ -67,14 +67,24 @@ function App(props) {
             />
           </Switch>
 
-          <Divider color="light" />
-          <Footer
-            color="white"
-            size="medium"
-            logo="https://uploads.divjoy.com/logo.svg"
-            description="A short description of what you do here"
-            copyright="© Company Name"
-          />
+          <Switch>
+            <Route exact path="/" />
+            <Route exact component={ () => {
+              return (
+                <>
+                  <Divider color="light" />
+                  <Footer
+                    color="white"
+                    size="medium"
+                    logo="https://uploads.divjoy.com/logo.svg"
+                    description="A short description of what you do here"
+                    copyright="© Company Name"
+                  />
+                </>
+              )
+            }
+            } />
+          </Switch>
         </>
       </Router>
     </ProvideAuth>
