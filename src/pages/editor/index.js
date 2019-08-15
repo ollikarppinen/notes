@@ -32,9 +32,11 @@ export default function EditorPage(props) {
     () => {
       if (!userUid) { return }
 
-      const handleDocSet = props => {
+      const handleDocSet = response => {
         setLoading(false);
-        setDoc(props.data().doc);
+        const data = response && response.data && response.data();
+        const doc = data ? (data.doc || '') : '';
+        setDoc(doc);
       }
 
       const unsubscribe = firebase.firestore().collection('notes').doc(userUid).onSnapshot(handleDocSet, setError)
