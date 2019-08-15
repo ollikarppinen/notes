@@ -1,17 +1,31 @@
 @charset "utf-8";
 
+// Dracula theme
+$background: #282a36;
+$current-line: #44475a;
+$selection: #44475a;
+$foreground: #f8f8f2;
+$comment: #6272a4;
+$cyan: #8be9fd;
+$green: #50fa7b;
+$orange: #ffb86c;
+$pink: #ff79c6;
+$purple: #bd93f9;
+$red: #ff5555;
+$yellow: #f1fa8c;
+
 // COLORS
-$primary: #00d1b2;
-$info: #209CEE;
-$success: #23D160;
-$warning: #FFDD57;
-$danger: #FF3860;
-$light: #F5F5F5;
-$dark: #363636;
+$primary: $background;
+$info: $cyan;
+$success: $green;
+$warning: $yellow;
+$danger: $red;
+$light: $foreground;
+$dark: $current-line;
 
 // TEXT
-$text: #4A4A4A;
-$link: #3273DC;
+$text: $foreground;
+$link: $info;
 $body-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen",
   "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
   "Helvetica", "Arial", sans-serif;
@@ -34,6 +48,11 @@ $section-padding-large: 9rem 1.5rem;
 
 // SEE DOCS FOR MORE:
 // https://bit.ly/30UvE5O
+
+body, html, #root {
+  height: 100%;
+  width: 100%;
+}
 
 // IMPORT BULMA
 @import "~bulma/bulma.sass";

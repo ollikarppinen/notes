@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "./../../components/Navbar";
 import EditorPage from "./../editor";
+import HomePage from "./../home";
 import AboutPage from "./../about";
 import FaqPage from "./../faq";
 import PricingPage from "./../pricing";
@@ -22,14 +23,26 @@ function App(props) {
     <ProvideAuth>
       <Router>
         <>
-          <Navbar
-            color="primary"
-            spaced={true}
-            logo="https://uploads.divjoy.com/logo-white.svg"
-          />
+          <Switch>
+            <Route exact path="/editor" />
+            <Route exact component={() => {
+              return (
+                <>
+                  <Navbar
+                    color="primary"
+                    spaced={true}
+                    logo="https://uploads.divjoy.com/logo-white.svg"
+                  />
+                </>
+              )
+            }
+            } />
+          </Switch>
 
           <Switch>
-            <Route exact path="/" component={EditorPage} />
+            <Route exact path="/" component={HomePage} />
+
+            <Route exact path="/editor" component={EditorPage} />
 
             <Route exact path="/about" component={AboutPage} />
 
@@ -68,7 +81,7 @@ function App(props) {
           </Switch>
 
           <Switch>
-            <Route exact path="/" />
+            <Route exact path="/editor" />
             <Route exact component={ () => {
               return (
                 <>
