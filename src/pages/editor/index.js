@@ -1,14 +1,19 @@
 import * as React from "react";
 import ReactMde from "react-mde";
-// import ReactDOM from "react-dom";
+import ReactDOM from "react-dom";
 import * as firebase from "firebase/app";
 import 'firebase/firestore';
 
+import { GlobalHotKeys, configure } from "react-hotkeys";
 import * as Showdown from "showdown";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import './styles.scss';
 import { useAuth } from "./../../util/auth.js";
 import { useDebounce } from 'react-use';
+
+configure({
+  ignoreEventsCondition: () => false
+});
 
 const converter = new Showdown.Converter({
   tables: true,
@@ -16,14 +21,18 @@ const converter = new Showdown.Converter({
   strikethrough: true,
   tasklists: true
 });
-
 converter.setFlavor('github');
+
+const keyMap = {
+  WRITE: 'alt+w',
+  PREVIEW: 'alt+p'
+};
 
 export default function EditorPage(props) {
   const auth = useAuth();
   const userUid = auth && auth.user && auth.user.uid;
 
-  const mdeEl = React.useRef(null);
+  const editorEl = React.useRef(null);
 
   const [error, setError] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -58,32 +67,38 @@ export default function EditorPage(props) {
   );
 
   React.useEffect(
-    () => {
-      if (tab !== 'write') { return }
-      if (mdeEl && mdeEl.current && mdeEl.current.textAreaRef) { mdeEl.current.textAreaRef.focus() }
-    },
+    () => focusEditor(editorEl, tab),
     [tab]
   )
 
-  if (mdeEl && mdeEl.current && mdeEl.current.textAreaRef) { mdeEl.current.textAreaRef.focus() }
+  const handlers = {
+    WRITE: () => setTab('write'),
+    PREVIEW: () => setTab('preview')
+  };
+
+  focusEditor(editorEl, tab)
 
   return (
-    <div className="editor-page container">
+    <GlobalHotKeys keyMap={keyMap} handlers={handlers} className="editor-page container" focused={true} attach={window}>
       {
         loading ? <h1>Loading...</h1> : (
           <ReactMde
-            ref={mdeEl}
+            ref={editorEl}
             value={doc}
             onChange={setDoc}
             selectedTab={tab}
             onTabChange={setTab}
-            generateMarkdownPreview={markdown =>
-              Promise.resolve(converter.makeHtml(markdown))
-            }
+            generateMarkdownPreview={markdown => Promise.resolve(converter.makeHtml(markdown))}
             minEditorHeight='calc(100% - 65px)'
           />
         )
       }
-    </div>
+    </GlobalHotKeys>
   );
+}
+
+const focusEditor = (el, tab) => {
+  if (tab === 'write' && el.current && el.current.textAreaRef) {
+    el.current.textAreaRef.focus()
+  }
 }
