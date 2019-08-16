@@ -1,67 +1,11 @@
-@import "../../styles.scss";
-
-@import url('https://fonts.googleapis.com/css?family=Inconsolata:300,400,500,700');
-
-.editor-page.container, .react-mde, .mde-text {
-  width: 100%;
+.editor-page {
   height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  background-color: $background;
-  color: $foreground;
-}
 
-.react-mde {
-  .grip {
-    display: none;
-  }
-}
-
-.mde-header, .mde-preview-content {
-  background-color: $background;
-
-  color: $comment!important;
-
-  button, strong, code {
-    color: $comment!important;
+  .columns {
+    margin: 0;
   }
 
-  button.selected {
-    border-color: $comment!important;
+  .column {
+    padding: 0;
   }
-}
-
-.mde-preview-content {
-  background-color: $background;
-
-  color: $comment!important;
-
-  button, strong, code {
-    color: $foreground!important;
-  }
-
-  button.selected {
-    border-color: $comment!important;
-  }
-}
-
-.react-mde, .mde-header {
-  font-family: "Inconsolata", Monaco, monospace;
-  font-weight: normal;
-  font-size: small;
-
-  border-color: $comment!important;
-
-  textarea, button, input, select {
-    font-family: "Inconsolata", Monaco, monospace;
-    line-height: 20px;
-    letter-spacing: 1px;
-    font-weight: normal;
-    color: lightgray;
-    font-size: small;
-  }
-}
-
-.mde-header .mde-tabs button.selected {
-  color: $comment;
 }
