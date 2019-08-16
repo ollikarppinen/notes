@@ -10,6 +10,8 @@ import "react-mde/lib/styles/css/react-mde-all.css";
 import './styles.scss';
 import { useAuth } from "./../../util/auth.js";
 import { useDebounce } from 'react-use';
+import uuidv4 from 'uuid/v4';
+import { get } from "https";
 
 configure({
   ignoreEventsCondition: () => false
@@ -30,7 +32,9 @@ const keyMap = {
 
 export default function EditorPage(props) {
   const auth = useAuth();
-  const userUid = auth && auth.user && auth.user.uid;
+  const userUid = (
+    auth && auth.user && auth.user.uid
+  ) || getUuid();
 
   const editorEl = React.useRef(null);
 
@@ -95,6 +99,14 @@ export default function EditorPage(props) {
       }
     </GlobalHotKeys>
   );
+}
+
+const getUuid = () => {
+  const uuid = localStorage.getItem('notes-session-uuid')
+  if (uuid) { return uuid }
+  const newUuid = uuidv4();
+  localStorage.setItem('notes-session-uuid', newUuid);
+  return newUuid
 }
 
 const focusEditor = (el, tab) => {
