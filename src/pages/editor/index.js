@@ -21,12 +21,14 @@ converter.setFlavor('github');
 
 export default function EditorPage(props) {
   const auth = useAuth();
-  const userUid = auth && auth.user && auth.user.uid
+  const userUid = auth && auth.user && auth.user.uid;
+
+  const mdeEl = React.useRef(null);
 
   const [error, setError] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [doc, setDoc] = React.useState('');
-  const [tab, setTab] = React.useState("write");
+  const [tab, setTab] = React.useState('write');
 
   React.useEffect(
     () => {
@@ -55,11 +57,22 @@ export default function EditorPage(props) {
     [doc]
   );
 
+  React.useEffect(
+    () => {
+      if (tab !== 'write') { return }
+      if (mdeEl && mdeEl.current && mdeEl.current.textAreaRef) { mdeEl.current.textAreaRef.focus() }
+    },
+    [tab]
+  )
+
+  if (mdeEl && mdeEl.current && mdeEl.current.textAreaRef) { mdeEl.current.textAreaRef.focus() }
+
   return (
     <div className="editor-page container">
       {
         loading ? <h1>Loading...</h1> : (
           <ReactMde
+            ref={mdeEl}
             value={doc}
             onChange={setDoc}
             selectedTab={tab}
