@@ -3,17 +3,12 @@ import ReactMde from "react-mde";
 import * as firebase from "firebase/app";
 import 'firebase/firestore';
 
-import { GlobalHotKeys, configure } from "react-hotkeys";
 import * as Showdown from "showdown";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import './editor.scss';
 import { useAuth } from "./../../util/auth.js";
 import { useDebounce } from 'react-use';
 import uuidv4 from 'uuid/v4';
-
-configure({
-  ignoreEventsCondition: () => false
-});
 
 const converter = new Showdown.Converter({
   tables: true,
@@ -23,12 +18,7 @@ const converter = new Showdown.Converter({
 });
 converter.setFlavor('github');
 
-const keyMap = {
-  WRITE: 'alt+w',
-  PREVIEW: 'alt+p'
-};
-
-export default function Editor(_props) {
+export default function Editor({ tab, setTab }) {
   const auth = useAuth();
   const userUid = (
     auth && auth.user && auth.user.uid
@@ -39,7 +29,6 @@ export default function Editor(_props) {
   const [error, setError] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [doc, setDoc] = React.useState('');
-  const [tab, setTab] = React.useState('write');
 
   React.useEffect(
     () => {
@@ -73,15 +62,10 @@ export default function Editor(_props) {
     [tab]
   )
 
-  const handlers = {
-    WRITE: () => setTab('write'),
-    PREVIEW: () => setTab('preview')
-  };
-
   focusEditor(editorEl, tab)
 
   return (
-    <GlobalHotKeys keyMap={keyMap} handlers={handlers} className="editor-page container" focused={true} attach={window}>
+    <div className='editor-page container'>
       {
         loading ? <h1>Loading...</h1> : (
           <ReactMde
@@ -95,7 +79,7 @@ export default function Editor(_props) {
           />
         )
       }
-    </GlobalHotKeys>
+    </div>
   );
 }
 
