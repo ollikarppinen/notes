@@ -6,9 +6,7 @@ import 'firebase/firestore';
 import * as Showdown from "showdown";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import './editor.scss';
-import { useAuth } from "./../../util/auth.js";
 import { useDebounce } from 'react-use';
-import uuidv4 from 'uuid/v4';
 
 const converter = new Showdown.Converter({
   tables: true,
@@ -18,12 +16,7 @@ const converter = new Showdown.Converter({
 });
 converter.setFlavor('github');
 
-export default function Editor({ tab, setTab }) {
-  const auth = useAuth();
-  const userUid = (
-    auth && auth.user && auth.user.uid
-  ) || getUuid();
-
+export default function Editor({ tab, setTab, userUid }) {
   const editorEl = React.useRef(null);
 
   const [error, setError] = React.useState(false);
@@ -41,7 +34,7 @@ export default function Editor({ tab, setTab }) {
         setDoc(doc);
       }
 
-      const unsubscribe = firebase.firestore().collection('notes').doc(userUid).onSnapshot(handleDocSet, setError)
+      const unsubscribe = firebase.firestore().collection('users').doc(userUid).onSnapshot(handleDocSet, setError)
       return () => unsubscribe()
     },
     [userUid]
@@ -49,7 +42,7 @@ export default function Editor({ tab, setTab }) {
 
   useDebounce(
     () => {
-      firebase.firestore().collection('notes').doc(userUid).set({
+      firebase.firestore().collection('users').doc(userUid).set({
         doc: doc
       })
     },
@@ -81,14 +74,6 @@ export default function Editor({ tab, setTab }) {
       }
     </div>
   );
-}
-
-const getUuid = () => {
-  const uuid = localStorage.getItem('notes-session-uuid')
-  if (uuid) { return uuid }
-  const newUuid = uuidv4();
-  localStorage.setItem('notes-session-uuid', newUuid);
-  return newUuid
 }
 
 const focusEditor = (el, tab) => {

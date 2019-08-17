@@ -1,3 +1,5 @@
+@import "../../styles.scss";
+
 .editor-page {
   height: 100%;
 
@@ -9,4 +11,9 @@
   .column {
     padding: 0;
   }
+
+  font-family: "Inconsolata", Monaco, monospace;
+  font-weight: normal;
+  font-size: small;
+  color: $comment;
 }
