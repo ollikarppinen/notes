@@ -21,7 +21,8 @@ const keyMap = {
   WRITE: 'alt+w',
   PREVIEW: 'alt+p',
   TOGGLE_EXPLORER: 'alt+e',
-  NEW_NOTE: 'alt+n'
+  NEW_NOTE: 'alt+n',
+  OPEN: 'alt+o'
 };
 
 const getId = () => {
@@ -57,7 +58,8 @@ export default function EditorPage(props) {
       explorerFlag = !explorerFlag;
       setShowExplorer(explorerFlag);
     },
-    NEW_NOTE: () => setShowModal(true)
+    NEW_NOTE: () => setShowModal(true),
+    OPEN: () => {}
   };
 
   useEffect(
