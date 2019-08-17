@@ -19,6 +19,7 @@
     "react-dom": "16.9.0",
     "react-hotkeys": "^2.0.0",
     "react-mde": "^7.6.2",
+    "react-modal": "^3.9.1",
     "react-router-dom": "5.0.1",
     "react-scripts": "3.0.1",
     "react-use": "^10.5.0",

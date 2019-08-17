@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as firebase from "firebase/app";
 import 'firebase/firestore';
 import { GlobalHotKeys, configure } from "react-hotkeys";
 import uuidv4 from 'uuid/v4';
 import { useDebounce } from 'react-use';
+import Modal from 'react-modal';
 
 import Editor from './editor';
 import Explorer from './explorer';
@@ -18,7 +19,8 @@ configure({
 const keyMap = {
   WRITE: 'alt+w',
   PREVIEW: 'alt+p',
-  TOGGLE_EXPLORER: 'alt+e'
+  TOGGLE_EXPLORER: 'alt+e',
+  NEW_NOTE: 'alt+n'
 };
 
 const getId = () => {
@@ -39,6 +41,9 @@ export default function EditorPage(props) {
   const [note, setNote] = useState('');
   const [noteId, setNoteId] = useState(null);
   const [notes, setNotes] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const inputEl = useRef(null);
 
   const auth = useAuth();
   const userId = (
@@ -52,7 +57,8 @@ export default function EditorPage(props) {
       e.preventDefault();
       explorerFlag = !explorerFlag;
       setShowExplorer(explorerFlag);
-    }
+    },
+    NEW_NOTE: () => setShowModal(true)
   };
 
   useEffect(
@@ -65,7 +71,7 @@ export default function EditorPage(props) {
           notes[note.id] = note.data()
         });
         setNotes(notes);
-        console.log('notes', notes)
+
         if (Object.keys(notes).length > 0) {
           const noteId = Object.keys(notes)[0]
           setNoteId(noteId)
@@ -74,7 +80,7 @@ export default function EditorPage(props) {
       }
 
       const unsubscribe = firebase.firestore().collection(`users/${userId}/notes`).get().then(onSuccess, setError)
-      return () => unsubscribe()
+      return unsubscribe
     },
     [userId]
   )
@@ -91,16 +97,46 @@ export default function EditorPage(props) {
     [note]
   );
 
-  useEffect(
-    () => {
+  const closeModal = () => setShowModal(false);
 
-    },
-    [noteId]
-  )
+  const createNote = name => {
+    const newNote = {
+      content: '',
+      name: name
+    }
+    firebase.firestore().collection(`users/${userId}/notes`).add(newNote).then(docRef => {
+      console.log('docRef', docRef)
+      setNotes({ [docRef.id]: newNote, ...notes })
+      setNoteId(docRef.id)
+      setNote(newNote.content)
+    }).catch(error => console.error("Error adding document: ", error))
+
+  }
+
+  const handleKeyDown = e => {
+    if (e.key === 'Enter') {
+      setShowModal(false);
+      createNote(e.target.value);
+    }
+  }
 
   return (
     <GlobalHotKeys keyMap={keyMap} handlers={handlers} focused={true} attach={window}>
       <div className="editor-page columns">
+        <Modal
+          isOpen={showModal}
+          onRequestClose={closeModal}
+          contentLabel="New note modal"
+          className='editor-modal'
+          ariaHideApp={false}
+          shouldCloseOnEsc
+          shouldReturnFocusAfterClose
+          style={{ overlay: { backgroundColor: 'rgba(255, 255, 255, 0)'}}}
+        >
+          <div className='container'>
+            <input autoFocus placeholder='Enter name of the note. You can specify path with /' onKeyDown={handleKeyDown} />
+          </div>
+        </Modal>
         { showExplorer ? (
           <div className='column is-one-fifth'>
             <Explorer notes={notes} />
