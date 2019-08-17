@@ -146,7 +146,7 @@ export default function EditorPage(props) {
           style={{ overlay: { backgroundColor: 'rgba(255, 255, 255, 0)'}}}
         >
           <div className='container'>
-            <input autoFocus placeholder='Enter name of the note. You can specify path with /' onKeyDown={handleKeyDown} />
+            <input autoFocus placeholder='Name of the note...' onKeyDown={handleKeyDown} />
           </div>
         </Modal>
         { showExplorer ? (
