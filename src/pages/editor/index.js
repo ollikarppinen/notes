@@ -85,12 +85,23 @@ export default function EditorPage(props) {
     [userId]
   )
 
+  useEffect(
+    () => {
+      if (!noteId) { return }
+      setNote(notes[noteId].content)
+    },
+    [noteId]
+  )
+
   useDebounce(
     () => {
       if (!noteId || !userId) { return }
 
       firebase.firestore().collection(`users/${userId}/notes`).doc(noteId).update({
         content: note
+      }).then(() => {
+        notes[noteId].content = note
+        setNotes(notes)
       })
     },
     2000,
@@ -106,9 +117,8 @@ export default function EditorPage(props) {
     }
     firebase.firestore().collection(`users/${userId}/notes`).add(newNote).then(docRef => {
       setNotes({ [docRef.id]: newNote, ...notes })
-      selectNote(docRef.id)
+      setNoteId(docRef.id)
     }).catch(error => console.error("Error adding document: ", error))
-
   }
 
   const handleKeyDown = e => {
@@ -116,11 +126,6 @@ export default function EditorPage(props) {
       setShowModal(false);
       createNote(e.target.value);
     }
-  }
-
-  const selectNote = id => {
-    setNoteId(id)
-    setNote(notes[id].content)
   }
 
   return (
@@ -142,7 +147,7 @@ export default function EditorPage(props) {
         </Modal>
         { showExplorer ? (
           <div className='column is-one-fifth'>
-            <Explorer notes={notes} noteId={noteId} selectNote={selectNote} />
+            <Explorer notes={notes} noteId={noteId} selectNote={setNoteId} />
           </div>
         ) : null }
         <div className='column'>
