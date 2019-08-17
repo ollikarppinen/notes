@@ -1,12 +1,9 @@
-import * as React from "react";
+import React, { useEffect, useRef } from 'react';
 import ReactMde from "react-mde";
-import * as firebase from "firebase/app";
-import 'firebase/firestore';
 
 import * as Showdown from "showdown";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import './editor.scss';
-import { useDebounce } from 'react-use';
 
 const converter = new Showdown.Converter({
   tables: true,
@@ -16,41 +13,10 @@ const converter = new Showdown.Converter({
 });
 converter.setFlavor('github');
 
-export default function Editor({ tab, setTab, userUid }) {
-  const editorEl = React.useRef(null);
+export default function Editor({ tab, setTab, note, setNote, loading }) {
+  const editorEl = useRef(null);
 
-  const [error, setError] = React.useState(false);
-  const [loading, setLoading] = React.useState(true);
-  const [doc, setDoc] = React.useState('');
-
-  React.useEffect(
-    () => {
-      if (!userUid) { return }
-
-      const handleDocSet = response => {
-        setLoading(false);
-        const data = response && response.data && response.data();
-        const doc = data ? (data.doc || '') : '';
-        setDoc(doc);
-      }
-
-      const unsubscribe = firebase.firestore().collection('users').doc(userUid).onSnapshot(handleDocSet, setError)
-      return () => unsubscribe()
-    },
-    [userUid]
-  )
-
-  useDebounce(
-    () => {
-      firebase.firestore().collection('users').doc(userUid).set({
-        doc: doc
-      })
-    },
-    2000,
-    [doc]
-  );
-
-  React.useEffect(
+  useEffect(
     () => focusEditor(editorEl, tab),
     [tab]
   )
@@ -63,8 +29,8 @@ export default function Editor({ tab, setTab, userUid }) {
         loading ? <h1>Loading...</h1> : (
           <ReactMde
             ref={editorEl}
-            value={doc}
-            onChange={setDoc}
+            value={note}
+            onChange={setNote}
             selectedTab={tab}
             onTabChange={setTab}
             generateMarkdownPreview={markdown => Promise.resolve(converter.makeHtml(markdown))}
