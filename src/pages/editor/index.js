@@ -7,6 +7,7 @@ import { useDebounce } from 'react-use';
 import Modal from 'react-modal';
 
 import Editor from './editor';
+import Commands from './commands';
 import Explorer from './explorer';
 import { useAuth } from "./../../util/auth.js";
 
@@ -43,8 +44,6 @@ export default function EditorPage(props) {
   const [notes, setNotes] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const inputEl = useRef(null);
-
   const auth = useAuth();
   const userId = (
     auth && auth.user && auth.user.uid
@@ -79,8 +78,8 @@ export default function EditorPage(props) {
         }
       }
 
-      const unsubscribe = firebase.firestore().collection(`users/${userId}/notes`).get().then(onSuccess, setError)
-      return unsubscribe
+      const unsubscribe = firebase.firestore().collection(`users/${userId}/notes`).get().then(onSuccess).catch(setError)
+      return () => unsubscribe();
     },
     [userId]
   )
@@ -156,7 +155,7 @@ export default function EditorPage(props) {
           </div>
         ) : null }
         <div className='column'>
-          <Editor {...{ setTab, tab, note, setNote }} />
+          { noteId ? <Editor {...{ setTab, tab, note, setNote }} /> : <Commands /> }
         </div>
       </div>
     </GlobalHotKeys >

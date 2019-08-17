@@ -3,9 +3,10 @@
 .explorer {
   background-color: $background;
   height: 100%;
+  border: 1px solid $comment;
+  padding: 15px;
 
   h1, ul {
-    padding: 15px;
     white-space: pre;
   }
 }
