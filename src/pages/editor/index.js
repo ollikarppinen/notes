@@ -93,15 +93,20 @@ export default function EditorPage(props) {
     [noteId]
   )
 
+  useEffect(
+    () => {
+      if (!noteId || !userId) { return }
+      notes[noteId].content = note
+      setNotes(notes)
+    },
+    [note]
+  )
+
   useDebounce(
     () => {
       if (!noteId || !userId) { return }
-
       firebase.firestore().collection(`users/${userId}/notes`).doc(noteId).update({
         content: note
-      }).then(() => {
-        notes[noteId].content = note
-        setNotes(notes)
       })
     },
     2000,

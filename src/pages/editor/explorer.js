@@ -12,7 +12,7 @@ export default function Explorer({ notes, noteId, selectNote }) {
           <ul>
             {
               Object.keys(notes).map(id => (
-                <li onClick={ () => selectNote(id) }>{`${id == noteId ? '=> ' : '   '}${notes[id].name}`}</li>
+                <li onClick={ () => selectNote(id) }>{`${id == noteId ? '-> ' : '   '}${notes[id].name}`}</li>
               ))
             }
           </ul>
