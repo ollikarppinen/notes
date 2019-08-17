@@ -105,10 +105,8 @@ export default function EditorPage(props) {
       name: name
     }
     firebase.firestore().collection(`users/${userId}/notes`).add(newNote).then(docRef => {
-      console.log('docRef', docRef)
       setNotes({ [docRef.id]: newNote, ...notes })
-      setNoteId(docRef.id)
-      setNote(newNote.content)
+      selectNote(docRef.id)
     }).catch(error => console.error("Error adding document: ", error))
 
   }
@@ -118,6 +116,11 @@ export default function EditorPage(props) {
       setShowModal(false);
       createNote(e.target.value);
     }
+  }
+
+  const selectNote = id => {
+    setNoteId(id)
+    setNote(notes[id].content)
   }
 
   return (
@@ -139,7 +142,7 @@ export default function EditorPage(props) {
         </Modal>
         { showExplorer ? (
           <div className='column is-one-fifth'>
-            <Explorer notes={notes} />
+            <Explorer notes={notes} noteId={noteId} selectNote={selectNote} />
           </div>
         ) : null }
         <div className='column'>

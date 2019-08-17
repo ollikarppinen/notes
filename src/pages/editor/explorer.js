@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import './explorer.scss'
 
-export default function Explorer({ notes }) {
+export default function Explorer({ notes, noteId, selectNote }) {
 
   return (
     <div className='explorer'>
@@ -10,7 +10,11 @@ export default function Explorer({ notes }) {
       {
         notes ? (
           <ul>
-            {Object.keys(notes).map(id => (<li>{notes[id].name}</li>))}
+            {
+              Object.keys(notes).map(id => (
+                <li onClick={ () => selectNote(id) }>{`${id == noteId ? '=> ' : '   '}${notes[id].name}`}</li>
+              ))
+            }
           </ul>
         ) : null
       }

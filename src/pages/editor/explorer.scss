@@ -4,7 +4,8 @@
   background-color: $background;
   height: 100%;
 
-  h1 {
+  h1, ul {
     padding: 15px;
+    white-space: pre;
   }
 }
