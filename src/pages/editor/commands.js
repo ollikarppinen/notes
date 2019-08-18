@@ -5,9 +5,9 @@ import './commands.scss'
 const COMMANDS = [
   ['New note', 'alt + n'],
   ['Toggle explorer', 'alt + e'],
-  ['Preview note', 'alt + p'],
+  ['Preview note', 'alt + v'],
   ['Edit note', 'alt + w'],
-  ['Open note', 'alt + o'],
+  ['Open note', 'alt + p'],
   ['Show help', 'alt + h']
 ]
 

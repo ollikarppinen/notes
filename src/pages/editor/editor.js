@@ -13,15 +13,15 @@ const converter = new Showdown.Converter({
 });
 converter.setFlavor('github');
 
-export default function Editor({ tab, setTab, note, setNote, loading }) {
+export default function Editor({ tab, setTab, note, setNote, loading, canFocus }) {
   const editorEl = useRef(null);
 
   useEffect(
-    () => focusEditor(editorEl, tab),
+    () => canFocus && focusEditor(editorEl, tab),
     [tab]
   )
 
-  focusEditor(editorEl, tab)
+  canFocus && focusEditor(editorEl, tab)
 
   return (
     <div className='editor-page container'>

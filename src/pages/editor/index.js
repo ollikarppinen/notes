@@ -19,10 +19,10 @@ configure({
 
 const keyMap = {
   WRITE: 'alt+w',
-  PREVIEW: 'alt+p',
+  PREVIEW: 'alt+v',
   TOGGLE_EXPLORER: 'alt+e',
   NEW_NOTE: 'alt+n',
-  OPEN: 'alt+o',
+  OPEN: 'alt+p',
   HELP: 'alt+h'
 };
 
@@ -58,7 +58,10 @@ export default function EditorPage(props) {
 
   const handlers = {
     WRITE: () => setTab('write'),
-    PREVIEW: () => setTab('preview'),
+    PREVIEW: e => {
+      e.preventDefault();
+      setTab('preview');
+    },
     TOGGLE_EXPLORER: e => {
       e.preventDefault();
       explorerFlag = !explorerFlag;
@@ -184,7 +187,7 @@ export default function EditorPage(props) {
           </div>
         ) : null }
         <div className='column'>
-          { noteId ? <Editor {...{ setTab, tab, note, setNote }} /> : <Commands /> }
+          { noteId ? <Editor {...{ setTab, tab, note, setNote }} canFocus={!showModal} /> : <Commands /> }
         </div>
       </div>
     </GlobalHotKeys >
