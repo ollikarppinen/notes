@@ -10,6 +10,7 @@ import Editor from './editor';
 import Commands from './commands';
 import Explorer from './explorer';
 import { useAuth } from "./../../util/auth.js";
+import Loader from '../../components/Loader';
 
 import './styles.scss'
 
@@ -20,14 +21,14 @@ configure({
 const keyMap = {
   WRITE: 'alt+w',
   PREVIEW: 'alt+v',
-  TOGGLE_EXPLORER: 'alt+e',
-  NEW_NOTE: 'alt+n',
+  EXPLORER: 'alt+e',
+  NEW: 'alt+n',
   OPEN: 'alt+p',
   HELP: 'alt+h'
 };
 
 const PLACEHOLDERS = {
-  NEW_NOTE: 'Create a note with name...',
+  NEW: 'Create a note with name...',
   OPEN: 'Open note by name...'
 }
 
@@ -56,24 +57,32 @@ export default function EditorPage(props) {
     auth && auth.user && auth.user.uid
   ) || getId();
 
+  const handleNew = () => setShowModal('NEW');
+  const handleOpen = () => setShowModal('OPEN');
+  const handleHelp = () => setNoteId(null);
+  const handleWrite = () => setTab('write');
+  const handlePreview = () => setTab('preview');
+  const handleExplorer = () => {
+    explorerFlag = !explorerFlag;
+    setShowExplorer(explorerFlag);
+  }
+
   const handlers = {
-    WRITE: () => setTab('write'),
-    PREVIEW: e => {
-      e.preventDefault();
-      setTab('preview');
-    },
-    TOGGLE_EXPLORER: e => {
-      e.preventDefault();
-      explorerFlag = !explorerFlag;
-      setShowExplorer(explorerFlag);
-    },
-    NEW_NOTE: () => setShowModal('NEW_NOTE'),
-    OPEN: () => setShowModal('OPEN'),
-    HELP: e => {
-      e.preventDefault();
-      setNoteId(null);
-    }
+    WRITE: handleWrite,
+    PREVIEW: handlePreview,
+    EXPLORER: handleExplorer,
+    NEW: handleNew,
+    OPEN: handleOpen,
+    HELP: handleHelp
   };
+
+  const handlersWithoutDefault = Object.keys(handlers).reduce((res, k) => {
+    res[k] = e => {
+      e.preventDefault();
+      handlers[k]();
+    }
+    return res;
+  }, {});
 
   useEffect(
     () => {
@@ -91,10 +100,12 @@ export default function EditorPage(props) {
           setNoteId(noteId)
           setNote(notes[noteId].content)
         }
+        setLoading(false);
       }
 
-      const unsubscribe = firebase.firestore().collection(`users/${userId}/notes`).get().then(onSuccess).catch(setError)
-      return () => unsubscribe();
+      setLoading(true);
+      firebase.firestore().collection(`users/${userId}/notes`).get().then(onSuccess).catch(setError)
+      return () => {};
     },
     [userId]
   )
@@ -154,7 +165,7 @@ export default function EditorPage(props) {
     if (e.key === 'Enter') {
       setShowModal(false);
       switch (showModal) {
-        case 'NEW_NOTE':
+        case 'NEW':
           createNote(e.target.value);
           break;
         case 'OPEN':
@@ -165,7 +176,7 @@ export default function EditorPage(props) {
   }
 
   return (
-    <GlobalHotKeys keyMap={keyMap} handlers={handlers} focused={true} attach={window}>
+    <GlobalHotKeys keyMap={keyMap} handlers={handlersWithoutDefault} focused={true} attach={window}>
       <div className="editor-page columns">
         <Modal
           isOpen={!!showModal}
@@ -187,7 +198,7 @@ export default function EditorPage(props) {
           </div>
         ) : null }
         <div className='column full-height'>
-          { noteId ? <Editor {...{ setTab, tab, note, setNote }} canFocus={!showModal} /> : <Commands /> }
+          { loading ? <Loader /> : noteId ? <Editor {...{ setTab, tab, note, setNote }} canFocus={!showModal} /> : <Commands { ...{ handlers } } /> }
         </div>
       </div>
     </GlobalHotKeys >
