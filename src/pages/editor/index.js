@@ -22,7 +22,8 @@ const keyMap = {
   PREVIEW: 'alt+p',
   TOGGLE_EXPLORER: 'alt+e',
   NEW_NOTE: 'alt+n',
-  OPEN: 'alt+o'
+  OPEN: 'alt+o',
+  HELP: 'alt+h'
 };
 
 const PLACEHOLDERS = {
@@ -64,7 +65,11 @@ export default function EditorPage(props) {
       setShowExplorer(explorerFlag);
     },
     NEW_NOTE: () => setShowModal('NEW_NOTE'),
-    OPEN: () => setShowModal('OPEN')
+    OPEN: () => setShowModal('OPEN'),
+    HELP: e => {
+      e.preventDefault();
+      setNoteId(null);
+    }
   };
 
   useEffect(
