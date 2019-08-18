@@ -136,7 +136,10 @@ export default function EditorPage(props) {
     const id = Object.keys(notes).reduce((res, key) => (
       (notes[key] && notes[key].name === name) ? key : res
     ), null);
-    if (id) { setNoteId(id) };
+    if (id) {
+      setTab('write')
+      setNoteId(id)
+    };
   }
 
   const handleKeyUp = e => {
