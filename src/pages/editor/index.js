@@ -25,6 +25,11 @@ const keyMap = {
   OPEN: 'alt+o'
 };
 
+const PLACEHOLDERS = {
+  NEW_NOTE: 'Create a note with name...',
+  OPEN: 'Open note by name...'
+}
+
 const getId = () => {
   const uuid = localStorage.getItem('notes-session-uuid')
   if (uuid) { return uuid }
@@ -43,7 +48,7 @@ export default function EditorPage(props) {
   const [note, setNote] = useState('');
   const [noteId, setNoteId] = useState(null);
   const [notes, setNotes] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(null);
 
   const auth = useAuth();
   const userId = (
@@ -58,8 +63,8 @@ export default function EditorPage(props) {
       explorerFlag = !explorerFlag;
       setShowExplorer(explorerFlag);
     },
-    NEW_NOTE: () => setShowModal(true),
-    OPEN: () => {}
+    NEW_NOTE: () => setShowModal('NEW_NOTE'),
+    OPEN: () => setShowModal('OPEN')
   };
 
   useEffect(
@@ -127,10 +132,24 @@ export default function EditorPage(props) {
     }).catch(error => console.error("Error adding document: ", error))
   }
 
-  const handleKeyDown = e => {
+  const openNote = name => {
+    const id = Object.keys(notes).reduce((res, key) => (
+      (notes[key] && notes[key].name === name) ? key : res
+    ), null);
+    if (id) { setNoteId(id) };
+  }
+
+  const handleKeyUp = e => {
     if (e.key === 'Enter') {
       setShowModal(false);
-      createNote(e.target.value);
+      switch (showModal) {
+        case 'NEW_NOTE':
+          createNote(e.target.value);
+          break;
+        case 'OPEN':
+          openNote(e.target.value);
+          break;
+      }
     }
   }
 
@@ -138,7 +157,7 @@ export default function EditorPage(props) {
     <GlobalHotKeys keyMap={keyMap} handlers={handlers} focused={true} attach={window}>
       <div className="editor-page columns">
         <Modal
-          isOpen={showModal}
+          isOpen={!!showModal}
           onRequestClose={closeModal}
           contentLabel="New note modal"
           className='editor-modal'
@@ -148,7 +167,7 @@ export default function EditorPage(props) {
           style={{ overlay: { backgroundColor: 'rgba(255, 255, 255, 0)'}}}
         >
           <div className='container'>
-            <input autoFocus placeholder='Name of the note...' onKeyDown={handleKeyDown} />
+            <input autoFocus placeholder={PLACEHOLDERS[showModal]} onKeyUp={handleKeyUp} />
           </div>
         </Modal>
         { showExplorer ? (
