@@ -186,7 +186,7 @@ export default function EditorPage(props) {
             <Explorer notes={notes} noteId={noteId} selectNote={setNoteId} />
           </div>
         ) : null }
-        <div className='column'>
+        <div className='column full-height'>
           { noteId ? <Editor {...{ setTab, tab, note, setNote }} canFocus={!showModal} /> : <Commands /> }
         </div>
       </div>
