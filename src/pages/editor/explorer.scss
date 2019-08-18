@@ -8,6 +8,10 @@
 
   h1, ul {
     white-space: pre;
+
+    span {
+      cursor: pointer;
+    }
   }
 
   ul {

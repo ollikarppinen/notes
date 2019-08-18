@@ -194,7 +194,7 @@ export default function EditorPage(props) {
         </Modal>
         { showExplorer ? (
           <div className='column is-one-fifth'>
-            <Explorer notes={notes} noteId={noteId} selectNote={setNoteId} />
+            <Explorer {...{ notes, noteId, setNoteId, handleHelp }} />
           </div>
         ) : null }
         <div className='column full-height'>
