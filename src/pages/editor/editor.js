@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import ReactMde from "react-mde";
 
 import * as Showdown from "showdown";
@@ -13,37 +13,18 @@ const converter = new Showdown.Converter({
 });
 converter.setFlavor('github');
 
-export default function Editor({ tab, setTab, note, setNote, loading, canFocus }) {
-  const editorEl = useRef(null);
+const Editor = ({ tab, setTab, note, setNote }) => (
+  <div className='editor-page container'>
+    <ReactMde
+      value={note}
+      onChange={setNote}
+      selectedTab={tab}
+      onTabChange={setTab}
+      generateMarkdownPreview={markdown => Promise.resolve(converter.makeHtml(markdown))}
+      minEditorHeight='calc(100% - 65px)'
+      textAreaProps={{ autoFocus: true }}
+    />
+  </div>
+);
 
-  useEffect(
-    () => canFocus && focusEditor(editorEl, tab),
-    [tab]
-  )
-
-  canFocus && focusEditor(editorEl, tab)
-
-  return (
-    <div className='editor-page container'>
-      {
-        loading ? <h1>Loading...</h1> : (
-          <ReactMde
-            ref={editorEl}
-            value={note}
-            onChange={setNote}
-            selectedTab={tab}
-            onTabChange={setTab}
-            generateMarkdownPreview={markdown => Promise.resolve(converter.makeHtml(markdown))}
-            minEditorHeight='calc(100% - 65px)'
-          />
-        )
-      }
-    </div>
-  );
-}
-
-const focusEditor = (el, tab) => {
-  if (tab === 'write' && el.current && el.current.textAreaRef) {
-    el.current.textAreaRef.focus()
-  }
-}
+export default Editor;

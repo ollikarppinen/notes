@@ -198,7 +198,12 @@ export default function EditorPage(props) {
           </div>
         ) : null }
         <div className='column full-height'>
-          { loading ? <Loader /> : noteId ? <Editor {...{ setTab, tab, note, setNote }} canFocus={!showModal} /> : <Commands { ...{ handlers } } /> }
+          { loading ?
+            <Loader /> :
+            noteId ?
+            <Editor {...{ setTab, tab, note, setNote }} canFocus={!showModal} /> :
+            <Commands { ...{ handlers } } />
+          }
         </div>
       </div>
     </GlobalHotKeys >
