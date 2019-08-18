@@ -8,7 +8,7 @@ const COMMANDS = [
   ['Preview note', 'alt + p'],
   ['Edit note', 'alt + w'],
   ['Open note', 'alt + o'],
-  ['Show commands', 'alt + h']
+  ['Show help', 'alt + h']
 ]
 
 const Commands = () => {

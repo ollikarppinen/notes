@@ -139,7 +139,7 @@ export default function EditorPage(props) {
 
   const openNote = name => {
     const id = Object.keys(notes).reduce((res, key) => (
-      (notes[key] && notes[key].name === name) ? key : res
+      (notes[key] && notes[key].name.toUpperCase() === name.toUpperCase()) ? key : res
     ), null);
     if (id) {
       setTab('write')
