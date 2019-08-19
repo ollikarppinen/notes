@@ -8,9 +8,8 @@ export const setContentAction = content => ({
   content
 });
 
-export const setNameAction = (id, name) => ({
-  type: 'SET_NAME',
-  id,
+export const renameAction = name => ({
+  type: 'RENAME',
   name
 });
 

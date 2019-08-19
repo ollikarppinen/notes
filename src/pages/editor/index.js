@@ -12,7 +12,8 @@ import {
   toggleExplorerAction,
   setTabWriteAction,
   setTabPreviewAction,
-  setCommandAction
+  setCommandAction,
+  renameAction
 } from '../../actions';
 
 import Editor from './editor';
@@ -142,8 +143,7 @@ export default function EditorPage(props) {
     firebase.firestore().collection(`users/${userId}/notes`).doc(noteId).update({
       name: newName
     }).then(() => {
-      notes[noteId].name = newName;
-      dispatch(setNotesAction(notes));
+      dispatch(renameAction(newName));
     }).catch(error => console.error("Error renaming document: ", error))
   }
 

@@ -6,6 +6,7 @@ const defaultState = {
 };
 
 const reducers = (state = defaultState, action) => {
+  let note;
   switch (action.type) {
     case 'SET_NOTES':
       return {
@@ -13,7 +14,7 @@ const reducers = (state = defaultState, action) => {
         notes: action.notes
       };
     case 'SET_CONTENT':
-      const note = state.notes[state.noteId];
+      note = state.notes[state.noteId];
       return note ? ({
         ...state,
         notes: {
@@ -24,10 +25,17 @@ const reducers = (state = defaultState, action) => {
           }
         }
       }) : state;
-    case 'SET_NAME':
-      return state.notes.id ? ({
-        ...state.notes.id,
-        name: action.name
+    case 'RENAME':
+      note = state.notes[state.noteId];
+      return note ? ({
+        ...state,
+        notes: {
+          ...state.notes,
+          [state.noteId]: {
+            ...note,
+            name: action.name
+          }
+        }
       }) : state;
     case 'SET_NOTE_ID':
       return {
