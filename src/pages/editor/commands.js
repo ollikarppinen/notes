@@ -8,7 +8,9 @@ const COMMANDS = [
   ['PREVIEW', 'Preview note', 'alt + v'],
   ['WRITE', 'Edit note', 'alt + w'],
   ['OPEN', 'Open note', 'alt + p'],
-  ['HELP', 'Show help', 'alt + h']
+  ['HELP', 'Show help', 'alt + h'],
+  ['DELETE', 'Delete', 'alt + d'],
+  ['RENAME', 'Rename', 'alt + r']
 ]
 
 const Commands = ({ handlers }) => {

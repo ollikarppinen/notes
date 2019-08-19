@@ -3,8 +3,17 @@ import * as firebase from "firebase/app";
 import 'firebase/firestore';
 import { GlobalHotKeys, configure } from "react-hotkeys";
 import uuidv4 from 'uuid/v4';
-import { useDebounce } from 'react-use';
+import { useDispatch, useSelector } from 'react-redux'
 import Modal from 'react-modal';
+
+import {
+  setNotesAction,
+  setNoteIdAction,
+  toggleExplorerAction,
+  setTabWriteAction,
+  setTabPreviewAction,
+  setCommandAction
+} from '../../actions';
 
 import Editor from './editor';
 import Commands from './commands';
@@ -24,12 +33,16 @@ const keyMap = {
   EXPLORER: 'alt+e',
   NEW: 'alt+n',
   OPEN: 'alt+p',
-  HELP: 'alt+h'
+  HELP: 'alt+h',
+  RENAME: 'alt+r',
+  DELETE: 'alt+d'
 };
 
 const PLACEHOLDERS = {
   NEW: 'Create a note with name...',
-  OPEN: 'Open note by name...'
+  OPEN: 'Open note by name...',
+  RENAME: 'Rename note...',
+  DELETE: 'Delete note by name...'
 }
 
 const getId = () => {
@@ -41,31 +54,28 @@ const getId = () => {
 }
 
 export default function EditorPage(props) {
-  const [tab, setTab] = useState('write');
-  // TODO: Hacky. Replace with action (?)
-  let explorerFlag = true;
-  const [showExplorer, setShowExplorer] = useState(explorerFlag);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [note, setNote] = useState('');
-  const [noteId, setNoteId] = useState(null);
-  const [notes, setNotes] = useState(null);
-  const [showModal, setShowModal] = useState(null);
-
+  const dispatch = useDispatch();
   const auth = useAuth();
+
+  const [loading, setLoading] = useState(true);
+
+  const noteId = useSelector(({ state: { noteId } }) => noteId);
+  const showExplorer = useSelector(({ state: { showExplorer } }) => showExplorer);
+  const command = useSelector(({ state: { command } }) => command);
+  const notes = useSelector(({ state: { notes } }) => notes);
+
   const userId = (
     auth && auth.user && auth.user.uid
   ) || getId();
 
-  const handleNew = () => setShowModal('NEW');
-  const handleOpen = () => setShowModal('OPEN');
-  const handleHelp = () => setNoteId(null);
-  const handleWrite = () => setTab('write');
-  const handlePreview = () => setTab('preview');
-  const handleExplorer = () => {
-    explorerFlag = !explorerFlag;
-    setShowExplorer(explorerFlag);
-  }
+  const handleNew = () => dispatch(setCommandAction('NEW'));
+  const handleOpen = () => dispatch(setCommandAction('OPEN'));
+  const handleHelp = () => dispatch(setNoteIdAction(null));
+  const handleWrite = () => dispatch(setTabWriteAction());
+  const handlePreview = () => dispatch(setTabPreviewAction());
+  const handleExplorer = () => dispatch(toggleExplorerAction());
+  const handleDelete = () => dispatch(setCommandAction('DELETE'));
+  const handleRename = () => dispatch(setCommandAction('RENAME'));
 
   const handlers = {
     WRITE: handleWrite,
@@ -73,7 +83,9 @@ export default function EditorPage(props) {
     EXPLORER: handleExplorer,
     NEW: handleNew,
     OPEN: handleOpen,
-    HELP: handleHelp
+    HELP: handleHelp,
+    DELETE: handleDelete,
+    RENAME: handleRename
   };
 
   const handlersWithoutDefault = Object.keys(handlers).reduce((res, k) => {
@@ -93,52 +105,25 @@ export default function EditorPage(props) {
         querySnapshot.forEach(note => {
           notes[note.id] = note.data()
         });
-        setNotes(notes);
+        dispatch(setNotesAction(notes));
 
         if (Object.keys(notes).length > 0) {
-          const noteId = Object.keys(notes)[0]
-          setNoteId(noteId)
-          setNote(notes[noteId].content)
+          const id = Object.keys(notes)[0]
+          dispatch(setNoteIdAction(id))
         }
         setLoading(false);
       }
 
       setLoading(true);
-      firebase.firestore().collection(`users/${userId}/notes`).get().then(onSuccess).catch(setError)
+      firebase.firestore().collection(`users/${userId}/notes`).get()
+        .then(onSuccess)
+        .catch(error => console.error("Error getting notes: ", error))
       return () => {};
     },
     [userId]
   )
 
-  useEffect(
-    () => {
-      if (!noteId) { return }
-      setNote(notes[noteId].content)
-    },
-    [noteId]
-  )
-
-  useEffect(
-    () => {
-      if (!noteId || !userId) { return }
-      notes[noteId].content = note
-      setNotes(notes)
-    },
-    [note]
-  )
-
-  useDebounce(
-    () => {
-      if (!noteId || !userId) { return }
-      firebase.firestore().collection(`users/${userId}/notes`).doc(noteId).update({
-        content: note
-      })
-    },
-    2000,
-    [note]
-  );
-
-  const closeModal = () => setShowModal(false);
+  const closeModal = () => dispatch(setCommandAction(null));
 
   const createNote = name => {
     const newNote = {
@@ -146,9 +131,20 @@ export default function EditorPage(props) {
       name: name
     }
     firebase.firestore().collection(`users/${userId}/notes`).add(newNote).then(docRef => {
-      setNotes({ [docRef.id]: newNote, ...notes })
-      setNoteId(docRef.id)
+      dispatch(setNotesAction({ [docRef.id]: newNote, ...notes }))
+      dispatch(setNoteIdAction(docRef.id))
     }).catch(error => console.error("Error adding document: ", error))
+  }
+
+  const renameNote = newName => {
+    if (!noteId || !notes[noteId]) { return }
+
+    firebase.firestore().collection(`users/${userId}/notes`).doc(noteId).update({
+      name: newName
+    }).then(() => {
+      notes[noteId].name = newName;
+      dispatch(setNotesAction(notes));
+    }).catch(error => console.error("Error renaming document: ", error))
   }
 
   const openNote = name => {
@@ -156,20 +152,26 @@ export default function EditorPage(props) {
       (notes[key] && notes[key].name.toUpperCase() === name.toUpperCase()) ? key : res
     ), null);
     if (id) {
-      setTab('write')
-      setNoteId(id)
+      dispatch(setTabWriteAction());
+      dispatch(setNoteIdAction(id))
     };
   }
 
   const handleKeyUp = e => {
     if (e.key === 'Enter') {
-      setShowModal(false);
-      switch (showModal) {
+      dispatch(setCommandAction(null));
+      switch (command) {
         case 'NEW':
           createNote(e.target.value);
           break;
         case 'OPEN':
           openNote(e.target.value);
+          break;
+        case 'DELETE':
+          openNote(e.target.value);
+          break;
+        case 'RENAME':
+          renameNote(e.target.value);
           break;
       }
     }
@@ -179,7 +181,7 @@ export default function EditorPage(props) {
     <GlobalHotKeys keyMap={keyMap} handlers={handlersWithoutDefault} focused={true} attach={window}>
       <div className="editor-page columns">
         <Modal
-          isOpen={!!showModal}
+          isOpen={!!command}
           onRequestClose={closeModal}
           contentLabel="New note modal"
           className='editor-modal'
@@ -189,19 +191,19 @@ export default function EditorPage(props) {
           style={{ overlay: { backgroundColor: 'rgba(255, 255, 255, 0)'}}}
         >
           <div className='container'>
-            <input autoFocus placeholder={PLACEHOLDERS[showModal]} onKeyUp={handleKeyUp} />
+            <input autoFocus placeholder={PLACEHOLDERS[command]} onKeyUp={handleKeyUp} />
           </div>
         </Modal>
         { showExplorer ? (
           <div className='column is-one-fifth'>
-            <Explorer {...{ notes, noteId, setNoteId, handleHelp }} />
+            <Explorer {...{ notes, noteId, handleHelp }} setNoteId={id => dispatch(setNoteIdAction(id))} />
           </div>
         ) : null }
         <div className='column full-height'>
           { loading ?
             <Loader /> :
             noteId ?
-            <Editor {...{ setTab, tab, note, setNote }} canFocus={!showModal} /> :
+            <Editor canFocus={!command} userId={userId} /> :
             <Commands { ...{ handlers } } />
           }
         </div>

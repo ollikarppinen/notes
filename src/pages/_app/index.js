@@ -1,4 +1,8 @@
 import React from "react";
+import { Provider } from 'react-redux';
+
+import { store } from '../../store';
+
 import Navbar from "./../../components/Navbar";
 import EditorPage from "./../editor";
 import HomePage from "./../home";
@@ -14,93 +18,95 @@ import ChangepassPage from "./../changepass";
 import { Switch, Route, Router } from "./../../util/router.js";
 import Divider from "./../../components/Divider";
 import Footer from "./../../components/Footer";
-import analytics from "./../../util/analytics.js";
 import { ProvideAuth } from "./../../util/auth.js";
+
 import "./styles.scss";
 
 function App(props) {
   return (
-    <ProvideAuth>
-      <Router>
-        <>
-          <Switch>
-            <Route exact path="/editor" />
-            <Route exact component={() => {
-              return (
-                <>
-                  <Navbar
-                    color="primary"
-                    spaced={true}
-                    logo="https://uploads.divjoy.com/logo-white.svg"
-                  />
-                </>
-              )
-            }
-            } />
-          </Switch>
-
-          <Switch>
-            <Route exact path="/" component={HomePage} />
-
-            <Route exact path="/editor" component={EditorPage} />
-
-            <Route exact path="/about" component={AboutPage} />
-
-            <Route exact path="/faq" component={FaqPage} />
-
-            <Route exact path="/pricing" component={PricingPage} />
-
-            <Route exact path="/contact" component={ContactPage} />
-
-            <Route exact path="/dashboard" component={DashboardPage} />
-
-            <Route exact path="/signin" component={SigninPage} />
-
-            <Route exact path="/signup" component={SignupPage} />
-
-            <Route exact path="/forgotpass" component={ForgotpassPage} />
-
-            <Route exact path="/changepass" component={ChangepassPage} />
-
-            <Route
-              component={({ location }) => {
+    <Provider store={store}>
+      <ProvideAuth>
+        <Router>
+          <>
+            <Switch>
+              <Route exact path="/editor" />
+              <Route exact component={() => {
                 return (
-                  <div
-                    style={{
-                      padding: "50px",
-                      width: "100%",
-                      textAlign: "center"
-                    }}
-                  >
-                    The page <code>{location.pathname}</code> could not be
-                    found.
-                  </div>
-                );
-              }}
-            />
-          </Switch>
+                  <>
+                    <Navbar
+                      color="primary"
+                      spaced={true}
+                      logo="https://uploads.divjoy.com/logo-white.svg"
+                    />
+                  </>
+                )
+              }
+              } />
+            </Switch>
 
-          <Switch>
-            <Route exact path="/editor" />
-            <Route exact component={ () => {
-              return (
-                <>
-                  <Divider color="light" />
-                  <Footer
-                    color="white"
-                    size="medium"
-                    logo="https://uploads.divjoy.com/logo.svg"
-                    description="A short description of what you do here"
-                    copyright="© Company Name"
-                  />
-                </>
-              )
-            }
-            } />
-          </Switch>
-        </>
-      </Router>
-    </ProvideAuth>
+            <Switch>
+              <Route exact path="/" component={HomePage} />
+
+              <Route exact path="/editor" component={EditorPage} />
+
+              <Route exact path="/about" component={AboutPage} />
+
+              <Route exact path="/faq" component={FaqPage} />
+
+              <Route exact path="/pricing" component={PricingPage} />
+
+              <Route exact path="/contact" component={ContactPage} />
+
+              <Route exact path="/dashboard" component={DashboardPage} />
+
+              <Route exact path="/signin" component={SigninPage} />
+
+              <Route exact path="/signup" component={SignupPage} />
+
+              <Route exact path="/forgotpass" component={ForgotpassPage} />
+
+              <Route exact path="/changepass" component={ChangepassPage} />
+
+              <Route
+                component={({ location }) => {
+                  return (
+                    <div
+                      style={{
+                        padding: "50px",
+                        width: "100%",
+                        textAlign: "center"
+                      }}
+                    >
+                      The page <code>{location.pathname}</code> could not be
+                      found.
+                    </div>
+                  );
+                }}
+              />
+            </Switch>
+
+            <Switch>
+              <Route exact path="/editor" />
+              <Route exact component={ () => {
+                return (
+                  <>
+                    <Divider color="light" />
+                    <Footer
+                      color="white"
+                      size="medium"
+                      logo="https://uploads.divjoy.com/logo.svg"
+                      description="A short description of what you do here"
+                      copyright="© Company Name"
+                    />
+                  </>
+                )
+              }
+              } />
+            </Switch>
+          </>
+        </Router>
+      </ProvideAuth>
+    </Provider>
   );
 }
 

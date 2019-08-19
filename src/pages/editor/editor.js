@@ -1,9 +1,19 @@
 import React from 'react';
 import ReactMde from "react-mde";
+import { useDebounce } from 'react-use';
+import { useDispatch, useSelector } from 'react-redux'
+import * as firebase from "firebase/app";
+import 'firebase/firestore';
+
+import {
+  setTabAction,
+  setContentAction
+} from '../../actions';
 
 import * as Showdown from "showdown";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import './editor.scss';
+import { dispatch } from 'rxjs/internal/observable/pairs';
 
 const converter = new Showdown.Converter({
   tables: true,
@@ -13,18 +23,41 @@ const converter = new Showdown.Converter({
 });
 converter.setFlavor('github');
 
-const Editor = ({ tab, setTab, note, setNote }) => (
-  <div className='editor-page container'>
-    <ReactMde
-      value={note}
-      onChange={setNote}
-      selectedTab={tab}
-      onTabChange={setTab}
-      generateMarkdownPreview={markdown => Promise.resolve(converter.makeHtml(markdown))}
-      minEditorHeight='calc(100% - 65px)'
-      textAreaProps={{ autoFocus: true }}
-    />
-  </div>
-);
+const Editor = ({ userId }) => {
+  const dispatch = useDispatch();
+
+  const content = useSelector(({ state }) => {
+    const { noteId, notes } = state;
+    return notes[noteId] ? notes[noteId].content : null
+  });
+  const noteId = useSelector(({ state: { noteId } }) => noteId);
+  const tab = useSelector(({ state: { tab } }) => tab);
+
+  useDebounce(
+    () => {
+      if (!noteId || !userId) { return }
+
+      firebase.firestore().collection(`users/${userId}/notes`).doc(noteId).update({
+        content: content
+      })
+    },
+    2000,
+    [content]
+  );
+
+  return (
+    <div className='editor-page container'>
+      <ReactMde
+        value={content}
+        onChange={content => dispatch(setContentAction(content))}
+        selectedTab={tab}
+        onTabChange={tab => dispatch(setTabAction(tab))}
+        generateMarkdownPreview={markdown => Promise.resolve(converter.makeHtml(markdown))}
+        minEditorHeight='calc(100% - 65px)'
+        textAreaProps={{ autoFocus: true }}
+      />
+    </div>
+  )
+};
 
 export default Editor;
