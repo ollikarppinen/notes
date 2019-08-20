@@ -1,6 +1,9 @@
 import React from 'react';
+import { useDispatch } from 'react-redux'
 
-import './commands.scss'
+import { HANDLERS } from './hotkeys';
+
+import './commands.scss';
 
 const COMMANDS = [
   ['NEW', 'New note', 'alt + n'],
@@ -13,7 +16,9 @@ const COMMANDS = [
   ['RENAME', 'Rename', 'alt + r']
 ]
 
-const Commands = ({ handlers }) => {
+const Commands = () => {
+  const handlers = HANDLERS(useDispatch());
+
   return (
     <div className='commands'>
       <h1>Commands</h1>

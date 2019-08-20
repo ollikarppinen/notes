@@ -1,22 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as firebase from "firebase/app";
 import 'firebase/firestore';
-import { GlobalHotKeys, configure } from "react-hotkeys";
 import uuidv4 from 'uuid/v4';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
 import Modal from 'react-modal';
 
 import {
   setNotesAction,
   setNoteIdAction,
-  toggleExplorerAction,
   setTabWriteAction,
-  setTabPreviewAction,
   setCommandAction,
   renameAction,
   deleteAction
 } from '../../actions';
 
+import {
+  noteIdSelector,
+  showExplorerSelector,
+  commandSelector,
+  notesSelector
+} from '../../selectors';
+
+import HotKeys, { PLACEHOLDERS, HANDLERS } from './hotkeys'
 import Editor from './editor';
 import Commands from './commands';
 import Explorer from './explorer';
@@ -24,28 +29,6 @@ import { useAuth } from "./../../util/auth.js";
 import Loader from '../../components/Loader';
 
 import './styles.scss'
-
-configure({
-  ignoreEventsCondition: () => false
-});
-
-const keyMap = {
-  WRITE: 'alt+w',
-  PREVIEW: 'alt+v',
-  EXPLORER: 'alt+e',
-  NEW: 'alt+n',
-  OPEN: 'alt+p',
-  HELP: 'alt+h',
-  RENAME: 'alt+r',
-  DELETE: 'alt+d'
-};
-
-const PLACEHOLDERS = {
-  NEW: 'Create a note with name...',
-  OPEN: 'Open note by name...',
-  RENAME: 'Rename note...',
-  DELETE: 'Delete note by name...'
-}
 
 const getId = () => {
   const uuid = localStorage.getItem('notes-session-uuid')
@@ -61,42 +44,14 @@ export default function EditorPage(props) {
 
   const [loading, setLoading] = useState(true);
 
-  const noteId = useSelector(({ state: { noteId } }) => noteId);
-  const showExplorer = useSelector(({ state: { showExplorer } }) => showExplorer);
-  const command = useSelector(({ state: { command } }) => command);
-  const notes = useSelector(({ state: { notes } }) => notes);
+  const noteId = useSelector(noteIdSelector);
+  const showExplorer = useSelector(showExplorerSelector);
+  const command = useSelector(commandSelector);
+  const notes = useSelector(notesSelector);
 
   const userId = (
     auth && auth.user && auth.user.uid
   ) || getId();
-
-  const handleNew = () => dispatch(setCommandAction('NEW'));
-  const handleOpen = () => dispatch(setCommandAction('OPEN'));
-  const handleHelp = () => dispatch(setNoteIdAction(null));
-  const handleWrite = () => dispatch(setTabWriteAction());
-  const handlePreview = () => dispatch(setTabPreviewAction());
-  const handleExplorer = () => dispatch(toggleExplorerAction());
-  const handleDelete = () => dispatch(setCommandAction('DELETE'));
-  const handleRename = () => dispatch(setCommandAction('RENAME'));
-
-  const handlers = {
-    WRITE: handleWrite,
-    PREVIEW: handlePreview,
-    EXPLORER: handleExplorer,
-    NEW: handleNew,
-    OPEN: handleOpen,
-    HELP: handleHelp,
-    DELETE: handleDelete,
-    RENAME: handleRename
-  };
-
-  const handlersWithoutDefault = Object.keys(handlers).reduce((res, k) => {
-    res[k] = e => {
-      e.preventDefault();
-      handlers[k]();
-    }
-    return res;
-  }, {});
 
   useEffect(
     () => {
@@ -125,7 +80,6 @@ export default function EditorPage(props) {
     [userId]
   )
 
-  const closeModal = () => dispatch(setCommandAction(null));
 
   const createNote = name => {
     const newNote = {
@@ -165,7 +119,7 @@ export default function EditorPage(props) {
     ), null);
     if (id) {
       dispatch(setTabWriteAction());
-      dispatch(setNoteIdAction(id))
+      dispatch(setNoteIdAction(id));
     };
   }
 
@@ -189,37 +143,38 @@ export default function EditorPage(props) {
     }
   }
 
+  const closeModal = () => dispatch(setCommandAction(null));
+
   return (
-    <GlobalHotKeys keyMap={keyMap} handlers={handlersWithoutDefault} focused={true} attach={window}>
-      <div className="editor-page columns">
-        <Modal
-          isOpen={!!command}
-          onRequestClose={closeModal}
-          contentLabel="New note modal"
-          className='editor-modal'
-          ariaHideApp={false}
-          shouldCloseOnEsc
-          shouldReturnFocusAfterClose
-          style={{ overlay: { backgroundColor: 'rgba(255, 255, 255, 0)'}}}
-        >
-          <div className='container'>
-            <input autoFocus placeholder={PLACEHOLDERS[command]} onKeyUp={handleKeyUp} />
-          </div>
-        </Modal>
-        { showExplorer ? (
-          <div className='column is-one-fifth'>
-            <Explorer {...{ notes, noteId, handleHelp }} setNoteId={id => dispatch(setNoteIdAction(id))} />
-          </div>
-        ) : null }
-        <div className='column full-height'>
-          { loading ?
-            <Loader /> :
-            noteId ?
-            <Editor canFocus={!command} userId={userId} /> :
-            <Commands { ...{ handlers } } />
-          }
+    <div className="editor-page columns">
+      <HotKeys />
+      <Modal
+        isOpen={!!command}
+        onRequestClose={closeModal}
+        contentLabel="New note modal"
+        className='editor-modal'
+        ariaHideApp={false}
+        shouldCloseOnEsc
+        shouldReturnFocusAfterClose
+        style={{ overlay: { backgroundColor: 'rgba(255, 255, 255, 0)'}}}
+      >
+        <div className='container'>
+          <input autoFocus placeholder={PLACEHOLDERS[command]} onKeyUp={handleKeyUp} />
         </div>
+      </Modal>
+      { showExplorer ? (
+        <div className='column is-one-fifth'>
+          <Explorer />
+        </div>
+      ) : null }
+      <div className='column full-height'>
+        { loading ?
+          <Loader /> :
+          noteId ?
+          <Editor canFocus={!command} userId={userId} /> :
+          <Commands />
+        }
       </div>
-    </GlobalHotKeys >
+    </div>
   )
 }

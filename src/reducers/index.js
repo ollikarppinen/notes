@@ -2,7 +2,8 @@ const defaultState = {
   notes: {},
   noteId: null,
   showExplorer: true,
-  command: null
+  command: null,
+  tab: 'write'
 };
 
 const reducers = (state = defaultState, action) => {
