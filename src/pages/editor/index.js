@@ -172,7 +172,7 @@ export default function EditorPage(props) {
         { loading ?
           <Loader /> :
           noteId ?
-          <Editor canFocus={!command} /> :
+          <Editor /> :
           <Commands />
         }
       </div>
