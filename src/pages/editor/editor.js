@@ -9,11 +9,16 @@ import {
   setTabAction,
   setContentAction
 } from '../../actions';
+import {
+  userUidSelector,
+  tabSelector,
+  noteIdSelector,
+  contentSelector
+} from '../../selectors';
 
 import * as Showdown from "showdown";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import './editor.scss';
-import { dispatch } from 'rxjs/internal/observable/pairs';
 
 const converter = new Showdown.Converter({
   tables: true,
@@ -23,21 +28,19 @@ const converter = new Showdown.Converter({
 });
 converter.setFlavor('github');
 
-const Editor = ({ userId }) => {
+const Editor = () => {
   const dispatch = useDispatch();
 
-  const content = useSelector(({ state }) => {
-    const { noteId, notes } = state;
-    return notes[noteId] ? notes[noteId].content : null
-  });
-  const noteId = useSelector(({ state: { noteId } }) => noteId);
-  const tab = useSelector(({ state: { tab } }) => tab);
+  const userUid = useSelector(userUidSelector);
+  const content = useSelector(contentSelector);
+  const noteId = useSelector(noteIdSelector);
+  const tab = useSelector(tabSelector);
 
   useDebounce(
     () => {
-      if (!noteId || !userId) { return }
+      if (!noteId || !userUid) { return }
 
-      firebase.firestore().collection(`users/${userId}/notes`).doc(noteId).update({
+      firebase.firestore().collection(`users/${userUid}/notes`).doc(noteId).update({
         content: content
       })
     },

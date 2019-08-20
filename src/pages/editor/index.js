@@ -18,7 +18,9 @@ import {
   noteIdSelector,
   showExplorerSelector,
   commandSelector,
-  notesSelector
+  notesSelector,
+  userUidSelector,
+  userSelector
 } from '../../selectors';
 
 import HotKeys, { PLACEHOLDERS, HANDLERS } from './hotkeys'
@@ -48,14 +50,11 @@ export default function EditorPage(props) {
   const showExplorer = useSelector(showExplorerSelector);
   const command = useSelector(commandSelector);
   const notes = useSelector(notesSelector);
-
-  const userId = (
-    auth && auth.user && auth.user.uid
-  ) || getId();
+  const userUid = useSelector(userUidSelector) || getId();
 
   useEffect(
     () => {
-      if (!userId) { return }
+      if (!userUid) { return }
 
       const onSuccess = querySnapshot => {
         const notes = {};
@@ -65,19 +64,21 @@ export default function EditorPage(props) {
         dispatch(setNotesAction(notes));
 
         if (Object.keys(notes).length > 0) {
-          const id = Object.keys(notes)[0]
-          dispatch(setNoteIdAction(id))
+          const id = Object.keys(notes)[0];
+          dispatch(setNoteIdAction(id));
+        } else {
+          dispatch(setNoteIdAction(null));
         }
         setLoading(false);
       }
 
       setLoading(true);
-      firebase.firestore().collection(`users/${userId}/notes`).get()
+      firebase.firestore().collection(`users/${userUid}/notes`).get()
         .then(onSuccess)
         .catch(error => console.error("Error getting notes: ", error))
       return () => {};
     },
-    [userId]
+    [userUid]
   )
 
 
@@ -86,7 +87,7 @@ export default function EditorPage(props) {
       content: '',
       name: name
     }
-    firebase.firestore().collection(`users/${userId}/notes`).add(newNote).then(docRef => {
+    firebase.firestore().collection(`users/${userUid}/notes`).add(newNote).then(docRef => {
       dispatch(setNotesAction({ [docRef.id]: newNote, ...notes }))
       dispatch(setNoteIdAction(docRef.id))
     }).catch(error => console.error("Error adding document: ", error))
@@ -95,7 +96,7 @@ export default function EditorPage(props) {
   const renameNote = newName => {
     if (!noteId || !notes[noteId]) { return }
 
-    firebase.firestore().collection(`users/${userId}/notes`).doc(noteId).update({
+    firebase.firestore().collection(`users/${userUid}/notes`).doc(noteId).update({
       name: newName
     }).then(() => {
       dispatch(renameAction(newName));
@@ -107,7 +108,7 @@ export default function EditorPage(props) {
       (notes[key] && notes[key].name.toUpperCase() === name.toUpperCase()) ? key : res
     ), null);
 
-    firebase.firestore().collection(`users/${userId}/notes`).doc(id).delete().then(() => {
+    firebase.firestore().collection(`users/${userUid}/notes`).doc(id).delete().then(() => {
       if (noteId === id) { dispatch(setNoteIdAction(null)); };
       dispatch(deleteAction(id));
     }).catch(error => console.error("Error deleting document: ", error));
@@ -171,7 +172,7 @@ export default function EditorPage(props) {
         { loading ?
           <Loader /> :
           noteId ?
-          <Editor canFocus={!command} userId={userId} /> :
+          <Editor canFocus={!command} /> :
           <Commands />
         }
       </div>

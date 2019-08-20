@@ -5,6 +5,7 @@ export const noteIdSelector = ({ state }) => state.noteId;
 export const showExplorerSelector = ({ state }) => state.showExplorer;
 export const commandSelector = ({ state }) => state.command;
 export const tabSelector = ({ state }) => state.tab;
+export const userSelector = ({ state }) => state.user;
 
 export const noteSelector = createSelector(
   notesSelector,
@@ -25,4 +26,9 @@ export const nameSelector = createSelector(
 export const nameIdSelector = createSelector(
   notesSelector,
   notes => Object.keys(notes).map(k => [notes[k].name, k])
+);
+
+export const userUidSelector = createSelector(
+  userSelector,
+  user => user && user.uid
 );

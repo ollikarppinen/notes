@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
+import { useDispatch } from 'react-redux';
 import queryString from "query-string";
 import * as firebase from "firebase/app";
 import "firebase/auth";
+
+import { setUserAction } from '../actions';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -33,6 +36,14 @@ export const useAuth = () => {
 // Provider hook that creates auth object and handles state
 function useProvideAuth() {
   const [user, setUser] = useState(null);
+  const dispatch = useDispatch();
+
+  useEffect(
+    () => {
+      dispatch(setUserAction(user));
+    },
+    [user]
+  )
 
   const signin = (email, password) => {
     return firebase

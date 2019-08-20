@@ -40,3 +40,8 @@ export const setCommandAction = command => ({
   type: 'SET_COMMAND',
   command
 });
+
+export const setUserAction = user => ({
+  type: 'SET_USER',
+  user
+});

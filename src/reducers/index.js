@@ -53,17 +53,22 @@ const reducers = (state = defaultState, action) => {
       return {
         ...state,
         showExplorer: !state.showExplorer
-      }
+      };
     case 'SET_TAB':
       return {
         ...state,
         tab: action.tab
-      }
+      };
     case 'SET_COMMAND':
       return {
         ...state,
         command: action.command
-      }
+      };
+    case 'SET_USER':
+      return {
+        ...state,
+        user: action.user
+      };
     default: return state;
   }
 }
