@@ -37,6 +37,12 @@ const reducers = (state = defaultState, action) => {
           }
         }
       }) : state;
+    case 'DELETE':
+      const { [action.id]: deletedNote, ...notes } = state.notes
+      return {
+        ...state,
+        notes
+      };
     case 'SET_NOTE_ID':
       return {
         ...state,

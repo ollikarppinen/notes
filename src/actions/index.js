@@ -13,6 +13,11 @@ export const renameAction = name => ({
   name
 });
 
+export const deleteAction = id => ({
+  type: 'DELETE',
+  id
+});
+
 export const setNoteIdAction = id => ({
   type: 'SET_NOTE_ID',
   id

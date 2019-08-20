@@ -13,7 +13,8 @@ import {
   setTabWriteAction,
   setTabPreviewAction,
   setCommandAction,
-  renameAction
+  renameAction,
+  deleteAction
 } from '../../actions';
 
 import Editor from './editor';
@@ -147,6 +148,17 @@ export default function EditorPage(props) {
     }).catch(error => console.error("Error renaming document: ", error))
   }
 
+  const deleteNote = name => {
+    const id = Object.keys(notes).reduce((res, key) => (
+      (notes[key] && notes[key].name.toUpperCase() === name.toUpperCase()) ? key : res
+    ), null);
+
+    firebase.firestore().collection(`users/${userId}/notes`).doc(id).delete().then(() => {
+      if (noteId === id) { dispatch(setNoteIdAction(null)); };
+      dispatch(deleteAction(id));
+    }).catch(error => console.error("Error deleting document: ", error));
+  }
+
   const openNote = name => {
     const id = Object.keys(notes).reduce((res, key) => (
       (notes[key] && notes[key].name.toUpperCase() === name.toUpperCase()) ? key : res
@@ -168,7 +180,7 @@ export default function EditorPage(props) {
           openNote(e.target.value);
           break;
         case 'DELETE':
-          openNote(e.target.value);
+          deleteNote(e.target.value);
           break;
         case 'RENAME':
           renameNote(e.target.value);
